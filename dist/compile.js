@@ -37,10 +37,7 @@
             url: url
           },
           dataType: 'jsonp'
-        }).always(function(body, status, msg) {
-          var obj;
-
-          obj = parseJSON(body);
+        }).always(function(obj, status, msg) {
           return callback(obj.body, obj.error);
         });
       }
@@ -52,14 +49,19 @@
 
     Compilation.prototype._end = function() {
       this.pending--;
+      return this._check();
+    };
+
+    Compilation.prototype._check = function() {
       if (this.pending === 0) {
-        return _finish();
+        return this._finish();
       }
     };
 
     Compilation.prototype._finish = function() {
       var done, _i, _len, _ref, _results;
 
+      console.log("finish!");
       _ref = this.dones;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -122,13 +124,15 @@
     Compilation.prototype.get = function(name, callback) {
       var gotValue;
 
+      this._begin();
       if (isArray(name)) {
         this._getAll(name, callback);
         return;
       }
       gotValue = function() {
         this._emit("get:" + name);
-        return callback(this.values[name]);
+        callback(this.values[name]);
+        return this._end();
       };
       if (this.values[name]) {
         return setTimeout(gotValue, 0);
@@ -141,12 +145,14 @@
       var gotValue,
         _this = this;
 
+      this._begin();
       if (this.values[name]) {
         return this._err("set: '" + name + "' already exists");
       }
       gotValue = function(val) {
         _this.values[name] = val;
-        return _this._emit("set:" + name);
+        _this._emit("set:" + name);
+        return _this._end();
       };
       if (/\s/.test(str)) {
         setTimeout((function() {
@@ -158,11 +164,39 @@
       return this;
     };
 
-    Compilation.prototype.download = function() {
+    Compilation.prototype.download = function(name) {
+      var _this = this;
+
+      this.get(name, function(val) {
+        return $("<form method='post'></form>").attr('action', 'http://compilejs.jpillora.com/download?filename=' + encodeURIComponent(name) + '.js').append($("<textarea name='__compilejsDownload'></textarea>").html(val)).submit();
+      });
+      this._check();
       return this;
     };
 
     Compilation.prototype.run = function(name, config) {
+      var gotSrc, task,
+        _this = this;
+
+      this._begin();
+      task = tasks[name];
+      if (!task) {
+        return this._err("run: Missing task '" + name + "'");
+      }
+      gotSrc = function(src) {
+        config.src = src;
+        return task.run.call(_this, config, function(err) {
+          if (err) {
+            _this._err("run: " + name + ": " + err);
+          }
+          return _this._end();
+        });
+      };
+      if (config.src) {
+        this.get(config.src, gotSrc);
+      } else {
+        setTimeout(gotSrc, 0);
+      }
       return this;
     };
 
@@ -205,5 +239,15 @@
       return tasks[name] = def;
     }
   };
+
+  if (typeof exports === "object") {
+    module.exports = compile;
+  } else if (typeof define === "function" && define.amd) {
+    define(function() {
+      return compile;
+    });
+  } else {
+    window.compile = compile;
+  }
 
 }).call(this);

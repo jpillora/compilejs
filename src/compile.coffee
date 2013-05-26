@@ -31,19 +31,15 @@ class Compilation
         url: 'http://compilejs.jpillora.com/retrieve',
         data: {url}
         dataType: 'jsonp'
-      }).always (body, status, msg) ->
-        obj = parseJSON body
+      }).always (obj, status, msg) ->
         callback obj.body, obj.error
 
-  _begin: ->
-    @pending++
-
-  _end: ->
-    @pending--
-    if @pending is 0
-      _finish()
+  _begin: -> @pending++
+  _end: -> @pending--; @_check()
+  _check: -> @_finish() if @pending is 0
 
   _finish: ->
+    console.log "finish!"
     for done in @dones
       done.call @
 
@@ -77,6 +73,8 @@ class Compilation
       )(i)
 
   get: (name, callback) ->
+    @_begin()
+
     if isArray name
       @_getAll name, callback
       return
@@ -84,6 +82,7 @@ class Compilation
     gotValue = ->
       @_emit "get:#{name}"
       callback @values[name]
+      @_end()
 
     if @values[name]
       setTimeout gotValue, 0
@@ -91,6 +90,7 @@ class Compilation
       @_on "set:#{name}", gotValue
 
   set: (name, str) ->
+    @_begin()
 
     if @values[name]
       return @_err "set: '#{name}' already exists"
@@ -98,6 +98,7 @@ class Compilation
     gotValue = (val) =>
       @values[name] = val
       @_emit "set:#{name}"
+      @_end()
 
     if /\s/.test str
       setTimeout (-> gotValue(str)), 0
@@ -106,17 +107,36 @@ class Compilation
 
     @
 
-  download: ->
-
-
-
+  download: (name) ->
+    @get name, (val) =>
+      $("<form method='post'></form>")
+        .attr('action', 'http://compilejs.jpillora.com/download?filename='+encodeURIComponent(name)+'.js')
+        .append($("<textarea name='__compilejsDownload'></textarea>").html(val))
+        .submit()
+    @_check()
     @
 
 
   run: (name, config) ->
+    @_begin()
 
+    task = tasks[name]
+
+    unless task
+      return @_err "run: Missing task '#{name}'"
+
+    gotSrc = (src) =>
+      config.src = src
+      task.run.call @, config, (err) =>
+        if err
+          @_err "run: #{name}: #{err}"
+        @_end()
+
+    if config.src
+      @get config.src, gotSrc
+    else
+      setTimeout gotSrc, 0
     @
-
 
   done: ->
     if arguments.length is 0
@@ -145,3 +165,10 @@ compile =
 
     tasks[name] = def
 
+#publicise
+if typeof exports is "object"
+  module.exports = compile
+else if typeof define is "function" && define.amd
+  define -> compile
+else
+  window.compile = compile

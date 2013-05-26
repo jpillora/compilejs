@@ -1,0 +1,27 @@
+<html>
+<body>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+  <script src="../dist/compile.js"></script>
+  <script src="../vendor/uglify.js"></script>
+  <script src="../dist/tasks/compile.uglify.js"></script>
+
+  <!-- show code -->
+  <script> $(function() { $("pre.demo").text( $("script.demo").html() ); }); </script>
+  <pre class="demo"> </pre>
+
+  <script class="demo">
+    compile
+      .init()
+      .set('lib', 'var foo = 42;')
+      .run('uglify', {
+        src: 'lib',
+        dest: 'lib-min'
+      })
+      .get('lib-min', function(code) {
+        console.log(code);
+      })
+  </script>
+
+</body>
+</html>

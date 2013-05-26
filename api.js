@@ -1,4 +1,5 @@
 
+//compile.js
 compile
   .init()
   .set('jquery', 'http://url')
@@ -45,7 +46,12 @@ compile
   });
 
 
+//tasks
+compile.task('coffee', function(config, done) {
 
+  this.get(config.src)
+
+});
 
 
 

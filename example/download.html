@@ -1,0 +1,19 @@
+<html>
+<body>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+  <script src="../dist/compile.js"></script>
+
+  <!-- show code -->
+  <script> $(function() { $("pre.demo").text( $("script.demo").html() ); }); </script>
+  <pre class="demo"> </pre>
+
+  <script class="demo">
+    compile
+      .init()
+      .set('superagent', 'https://raw.github.com/visionmedia/superagent/master/superagent.js')
+      .download('superagent');
+  </script>
+
+</body>
+</html>
