@@ -17,22 +17,6 @@ class Compilation
     @pending = 0
 
   #private api
-  _ajax: (url, callback) ->
-    #jquery version though could be swapped out...
-    m = url.match /https?:\/\/[^\/]+/
-    return @_err "ajax: Invalid URL: #{url}" unless m
-    origin = m[0]
-
-    if origin is window.location.origin
-      $.ajax({url}).always (body, status, msg) ->
-        callback status is 'error' and msg, body
-    else
-      $.ajax({
-        url: 'http://compilejs.jpillora.com/retrieve',
-        data: {url}
-        dataType: 'jsonp'
-      }).always (obj, status, msg) ->
-        callback obj.body, obj.error
 
   _begin: -> @pending++
   _end: -> @pending--; @_check()
@@ -55,10 +39,30 @@ class Compilation
       callback.call @, val
 
   _warn: (str) ->
-    console.warn str
+    console.warn 'compile.js', str
 
-  _err: ->
-    console.error str
+  _err: (str) ->
+    console.error 'compile.js', str
+    @_emit 'error', str
+
+  _ajax: (url, callback) ->
+    #jquery version though could be swapped out...
+    m = url.match /https?:\/\/[^\/]+/
+    # return @_err "ajax: Invalid URL: #{url}" unless m
+
+    if not m or m[0] is window.location.origin
+      $.ajax({url}).always (body, status, msg) =>
+        return @_err "ajax: #{msg}" if status is 'error'
+        callback body
+    else
+      $.ajax({
+        url: 'http://compilejs.jpillora.com/retrieve',
+        data: {url}
+        dataType: 'jsonp'
+      }).always (obj, status, msg) =>
+        return @_err "ajax: #{msg}" if status is 'error'
+        return @_err "ajax: #{obj.error}" if obj.error
+        callback obj.body
 
   #public api
   _getAll: (names, callback) ->
@@ -77,17 +81,21 @@ class Compilation
 
     if isArray name
       @_getAll name, callback
-      return
+      return @
+    if typeof name isnt 'string'
+      @_err
 
-    gotValue = ->
+    doCallback = ->
       @_emit "get:#{name}"
       callback @values[name]
       @_end()
 
     if @values[name]
-      setTimeout gotValue, 0
+      setTimeout doCallback, 0
     else
-      @_on "set:#{name}", gotValue
+      @_on "set:#{name}", doCallback
+
+    @
 
   set: (name, str) ->
     @_begin()
@@ -95,15 +103,16 @@ class Compilation
     if @values[name]
       return @_err "set: '#{name}' already exists"
 
-    gotValue = (val) =>
+    doCallback = (val) =>
       @values[name] = val
       @_emit "set:#{name}"
       @_end()
 
-    if /\s/.test str
-      setTimeout (-> gotValue(str)), 0
+    #if spaces or curlys then is code string
+    if /[\s\{\}]/.test str
+      setTimeout (-> doCallback str), 0
     else
-      @_ajax str, gotValue
+      @_ajax str, doCallback
 
     @
 
@@ -138,13 +147,8 @@ class Compilation
       setTimeout gotSrc, 0
     @
 
-  done: ->
-    if arguments.length is 0
-      return @_err "done: Missing callback"
-
-    gets = Array::slice.call arguments
-    done = names.pop()
-    dones.push { done, gets }
+  error: (callback) ->
+    @_on 'error', callback
     @
 
 #library wide tasks

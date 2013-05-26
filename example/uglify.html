@@ -13,14 +13,14 @@
   <script class="demo">
     compile
       .init()
-      .set('lib', 'var foo = 42;')
+      .set('lib', '../dist/compile.js')
       .run('uglify', {
         src: 'lib',
-        dest: 'lib-min'
+        dest: 'lib.min'
       })
-      .get('lib-min', function(code) {
+      .get('lib.min', function(code) {
         console.log(code);
-      })
+      });
   </script>
 
 </body>

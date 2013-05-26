@@ -4,9 +4,59 @@
     alert("Include Compile.js before tasks");
   }
 
+  UglifyJS.minify = function(codes, options) {
+    var compress, sq, stream, toplevel;
+
+    options = UglifyJS.defaults(options || {}, {
+      warnings: false,
+      mangle: {},
+      compress: {}
+    });
+    if (typeof codes === "string") {
+      codes = [codes];
+    }
+    toplevel = null;
+    codes.forEach(function(code) {
+      return toplevel = UglifyJS.parse(code, {
+        filename: "?",
+        toplevel: toplevel
+      });
+    });
+    if (options.compress) {
+      compress = {
+        warnings: options.warnings
+      };
+      UglifyJS.merge(compress, options.compress);
+      toplevel.figure_out_scope();
+      sq = UglifyJS.Compressor(compress);
+      toplevel = toplevel.transform(sq);
+    }
+    if (options.mangle) {
+      toplevel.figure_out_scope();
+      toplevel.compute_char_frequency();
+      toplevel.mangle_names(options.mangle);
+    }
+    stream = UglifyJS.OutputStream();
+    toplevel.print(stream);
+    return stream.toString();
+  };
+
+  UglifyJS.AST_Node.warn_function = function(txt) {
+    return console.warn(txt);
+  };
+
   compile.task('uglify', function(config, callback) {
+    var e, out;
+
     console.log("running uglify");
-    this.set(config.dest, UglifyJS.minify(config.src));
+    try {
+      out = UglifyJS.minify(config.src, config);
+    } catch (_error) {
+      e = _error;
+      callback("uglify: parse error: '" + e.message + "' on line: " + e.line + " col: " + e.col);
+      return;
+    }
+    this.set(config.dest, out);
     return callback();
   });
 

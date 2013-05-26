@@ -16,33 +16,6 @@
       this.pending = 0;
     }
 
-    Compilation.prototype._ajax = function(url, callback) {
-      var m, origin;
-
-      m = url.match(/https?:\/\/[^\/]+/);
-      if (!m) {
-        return this._err("ajax: Invalid URL: " + url);
-      }
-      origin = m[0];
-      if (origin === window.location.origin) {
-        return $.ajax({
-          url: url
-        }).always(function(body, status, msg) {
-          return callback(status === 'error' && msg, body);
-        });
-      } else {
-        return $.ajax({
-          url: 'http://compilejs.jpillora.com/retrieve',
-          data: {
-            url: url
-          },
-          dataType: 'jsonp'
-        }).always(function(obj, status, msg) {
-          return callback(obj.body, obj.error);
-        });
-      }
-    };
-
     Compilation.prototype._begin = function() {
       return this.pending++;
     };
@@ -94,11 +67,45 @@
     };
 
     Compilation.prototype._warn = function(str) {
-      return console.warn(str);
+      return console.warn('compile.js', str);
     };
 
-    Compilation.prototype._err = function() {
-      return console.error(str);
+    Compilation.prototype._err = function(str) {
+      console.error('compile.js', str);
+      return this._emit('error', str);
+    };
+
+    Compilation.prototype._ajax = function(url, callback) {
+      var m,
+        _this = this;
+
+      m = url.match(/https?:\/\/[^\/]+/);
+      if (!m || m[0] === window.location.origin) {
+        return $.ajax({
+          url: url
+        }).always(function(body, status, msg) {
+          if (status === 'error') {
+            return _this._err("ajax: " + msg);
+          }
+          return callback(body);
+        });
+      } else {
+        return $.ajax({
+          url: 'http://compilejs.jpillora.com/retrieve',
+          data: {
+            url: url
+          },
+          dataType: 'jsonp'
+        }).always(function(obj, status, msg) {
+          if (status === 'error') {
+            return _this._err("ajax: " + msg);
+          }
+          if (obj.error) {
+            return _this._err("ajax: " + obj.error);
+          }
+          return callback(obj.body);
+        });
+      }
     };
 
     Compilation.prototype._getAll = function(names, callback) {
@@ -122,44 +129,48 @@
     };
 
     Compilation.prototype.get = function(name, callback) {
-      var gotValue;
+      var doCallback;
 
       this._begin();
       if (isArray(name)) {
         this._getAll(name, callback);
-        return;
+        return this;
       }
-      gotValue = function() {
+      if (typeof name !== 'string') {
+        this._err;
+      }
+      doCallback = function() {
         this._emit("get:" + name);
         callback(this.values[name]);
         return this._end();
       };
       if (this.values[name]) {
-        return setTimeout(gotValue, 0);
+        setTimeout(doCallback, 0);
       } else {
-        return this._on("set:" + name, gotValue);
+        this._on("set:" + name, doCallback);
       }
+      return this;
     };
 
     Compilation.prototype.set = function(name, str) {
-      var gotValue,
+      var doCallback,
         _this = this;
 
       this._begin();
       if (this.values[name]) {
         return this._err("set: '" + name + "' already exists");
       }
-      gotValue = function(val) {
+      doCallback = function(val) {
         _this.values[name] = val;
         _this._emit("set:" + name);
         return _this._end();
       };
-      if (/\s/.test(str)) {
+      if (/[\s\{\}]/.test(str)) {
         setTimeout((function() {
-          return gotValue(str);
+          return doCallback(str);
         }), 0);
       } else {
-        this._ajax(str, gotValue);
+        this._ajax(str, doCallback);
       }
       return this;
     };
@@ -200,18 +211,8 @@
       return this;
     };
 
-    Compilation.prototype.done = function() {
-      var done, gets;
-
-      if (arguments.length === 0) {
-        return this._err("done: Missing callback");
-      }
-      gets = Array.prototype.slice.call(arguments);
-      done = names.pop();
-      dones.push({
-        done: done,
-        gets: gets
-      });
+    Compilation.prototype.error = function(callback) {
+      this._on('error', callback);
       return this;
     };
 

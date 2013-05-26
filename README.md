@@ -1,4 +1,6 @@
-compilejs
+
+Compile.js
 =========
 
-A mini Grunt.js for the browser
+> A GruntJS inspired JavaScript build tool for the browser
+
