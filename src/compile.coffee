@@ -6,6 +6,20 @@ parseJSON = JSON.parse or $.parseJSON
 isArray = (obj) ->
   Object::toString.call(obj) is '[object Array]'
 
+#chrome a.download
+saveAs = (name, text) ->
+  a = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+  return false  unless "download" of a
+  blob = new window.Blob([text],
+    type: "text/plain;charset=utf8"
+  )
+  a.href = window.URL.createObjectURL(blob)
+  a.download = name
+  event = document.createEvent("MouseEvents")
+  event.initMouseEvent "click"
+  a.dispatchEvent event
+  true
+
 #compliation class
 class Compilation
 
@@ -117,11 +131,15 @@ class Compilation
     @
 
   download: (name) ->
+
     @get name, (val) =>
+      return if saveAs("#{name}.js",val)
       $("<form method='post'></form>")
-        .attr('action', 'http://compilejs.jpillora.com/download?filename='+encodeURIComponent(name)+'.js')
+        .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(name)}.js")
         .append($("<textarea name='__compilejsDownload'></textarea>").html(val))
         .submit()
+    
+
     @_check()
     @
 

@@ -1,6 +1,7 @@
 unless compile?.task
   alert "Include Compile.js before tasks"
 
+#uglify lacks a browser helper to minify code 
 UglifyJS.minify = (codes, options) ->
   options = UglifyJS.defaults(options or {},
     warnings: false
