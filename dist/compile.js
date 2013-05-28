@@ -11,6 +11,9 @@
   saveAs = function(name, text) {
     var a, blob, event;
 
+    if (!document.createElementNS) {
+      return false;
+    }
     a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
     if (!("download" in a)) {
       return false;

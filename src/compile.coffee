@@ -8,6 +8,7 @@ isArray = (obj) ->
 
 #chrome a.download
 saveAs = (name, text) ->
+  return false unless document.createElementNS
   a = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
   return false  unless "download" of a
   blob = new window.Blob([text],
