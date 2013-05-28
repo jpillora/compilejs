@@ -15,8 +15,8 @@ saveAs = (name, text) ->
   )
   a.href = window.URL.createObjectURL(blob)
   a.download = name
-  event = document.createEvent("MouseEvents")
-  event.initMouseEvent "click"
+  event = document.createEvent "MouseEvents"
+  event.initMouseEvent "click", 1, 0, window, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null
   a.dispatchEvent event
   true
 
