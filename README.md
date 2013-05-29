@@ -74,7 +74,7 @@ Runs the given task with the given config
 
 Downloads the value of `name` as `<name>.js`
 
-*Note: On browsers that do not support [<a>.download](http://caniuse.com/download), the download
+*Note: On browsers that do not support [anchor download attribute](http://caniuse.com/download), the download
 will be forced by POSTing the contents of the file to the Compile.js POST replay server which
 will just return the content though with the `Content-Disposition` header set.*
 
