@@ -1,12 +1,10 @@
-
 Compile.js
 =========
 
-> A GruntJS inspired JavaScript build tool for the browser
-
 #### Summary
 
-Compile.js makes it easy to create custom build widgets for your open-source projects.
+A GruntJS inspired JavaScript build tool for the browser.
+Compile.js makes it easy to create front end custom build widgets for your open-source projects.
 
 #### Features
 
@@ -26,7 +24,7 @@ Use the [Compile.js Build Tool](http://jpillora.com/compilejs/builder/index.html
 
 #### Usage
 
-Minify your library with UglifyJS2
+Minify your library with [UglifyJS2](https://github.com/mishoo/UglifyJS2)
 
 ``` javascript
 compile
@@ -64,10 +62,9 @@ Get a value
 
 Set a value.
 
-A string is counted as raw if it has a ` ` or `{` or `}`. Yes very crude.
-
+*Note: A string is seen as a URL if it doesn't have any `space`, `{` or `}` characters. Yes, very crude.
 URLs will be retrieved with AJAX if they're on the same origin as the script,
-otherwise they will be retrieved using the Compile.js JSONP proxy server (No SLA provided :smile:).
+otherwise they will be retrieved using the Compile.js JSONP proxy server (No SLA provided :smile:)*
 
 ##### `instance`.`run( taskName, taskConfig )`
 
@@ -76,6 +73,10 @@ Runs the given task with the given config
 ##### `instance`.`download( name )`
 
 Downloads the value of `name` as `<name>.js`
+
+*Note: On browsers that do not support [<a>.download](http://caniuse.com/download), the download
+will be forced by POSTing the contents of the file to the Compile.js POST replay server which
+will just return the content though with the `Content-Disposition` header set.*
 
 ##### `instance`.`log( callback ( string ) )`
 
