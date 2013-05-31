@@ -13,7 +13,7 @@ Compile.js makes it easy to create front end custom build widgets for your open-
   * XHR for same origin
   * Compile.js JSONP proxy server for cross origin
 * Trigger File Downloads
-  * Chromes a.download for instant 
+  * Chromes a.download for instant
   * Compile.js server POST replay for download for other browsers
 * Provided tasks
 * Auto-parallelisation
@@ -46,23 +46,29 @@ compile
 
 *Note: This API is subject to change*
 
-##### compile.`task( name, definition )`
-
 Creates a new task
 
 ##### compile.`init( options )`
 
+*Note: No options yet (though you may post a feature request!)*
+
 Returns a Compile.js `instance`
 
-##### `instance`.`get( name, callback( err, value ) )`
+##### `instance`.`get( name[s], callback( err, value[s] ) )`
 
 Get a value
 
-##### `instance`.`set( name, raw-string|url-string )`
+* `name` must be a string or an array of strings
+
+##### `instance`.`set( name, value )`
 
 Set a value.
 
-*Note: A string is seen as a URL if it doesn't have any `space`, `{` or `}` characters. Yes, very crude.
+* `name` must be a string
+* `value` must be a string
+
+*Note: `value` will be seen as a URL and then retrieved if
+it doesn't have any `space`, `{` or `}` characters.
 URLs will be retrieved with AJAX if they're on the same origin as the script,
 otherwise they will be retrieved using the Compile.js JSONP proxy server (No SLA provided :smile:)*
 
@@ -70,9 +76,14 @@ otherwise they will be retrieved using the Compile.js JSONP proxy server (No SLA
 
 Runs the given task with the given config
 
+* `taskName` must be a string
+* `taskConfig` must be an object
+
 ##### `instance`.`download( name )`
 
 Downloads the value of `name` as `<name>.js`
+
+* `name` must be a string
 
 *Note: On browsers that do not support [anchor download attribute](http://caniuse.com/download), the download
 will be forced by POSTing the contents of the file to the Compile.js POST replay server which
@@ -89,6 +100,23 @@ Error handler (defaults to pipe to `console.error`)
 ##### `instance`.`warn( callback ( string ) )`
 
 Warning handler (defaults to pipe to `console.warn`)
+
+##### compile.`task( taskName, definition )`
+
+If `definition` is:
+
+* a string, it will be treated as a script URL and attempt to load it.
+* a function, it must have the signature `function(config, callback)`
+  * `config` will contain the object the user provides
+    * *Note: the `src` property will be passed through `instance`.`get()` and
+      when this function is executed, `config.src` will be the the `value[s]`
+      associated with the `name[s]`
+  * `callback` must be called when the task is complete
+
+* If `definition` is a object, it must contain:
+  * a required `run` function - which matches the signature above.
+  * an optional `fetch` object - which map global names to URLs, missing globals will be fetched.
+  * an optional `init` function - which will run once all URLs have been fetched.
 
 #### Tasks
 

@@ -1,0 +1,40 @@
+body, html {
+  width: 100%;
+}
+
+.app {
+  margin: 0 auto;
+  width: 600px;
+}
+
+.app .field {
+  background: whiteSmoke;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.app .field select {
+  height: 30px;
+}
+
+.app .field input {
+  width: 150px;
+}
+
+.go-compile button {
+  margin-right: 10px
+}
+
+.pure-button-success,
+.pure-button-error,
+.pure-button-warning,
+.pure-button-secondary {
+  color: white;
+  border-radius: 4px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.pure-button-success {
+  background: rgb(76, 201, 71); /* this is a green */
+}

@@ -3,13 +3,13 @@
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
   <script src="../dist/compile.js"></script>
-  <script src="../vendor/uglify.js"></script>
   <script src="../dist/tasks/compile.uglify.js"></script>
 
-  <!-- show code -->
+  <!-- show demo code -->
   <script> $(function() { $("pre.demo").text( $("script.demo").html() ); }); </script>
   <pre class="demo"> </pre>
 
+  <!-- demo code -->
   <script class="demo">
     compile
       .init()
@@ -20,6 +20,7 @@
       })
       .get('lib.min', function(code) {
         console.log(code);
+        console.log("minified to " + code.length + " bytes");
       });
   </script>
 

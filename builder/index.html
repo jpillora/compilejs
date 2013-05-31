@@ -1,10 +1,37 @@
 <html>
 <head>
-  <title></title>
+  <title>Compile.js Build Tool</title>
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.1.0/pure-min.css">
+  <link rel="stylesheet" href="./index.css">
 </head>
 <body>
+  <div class="app" ng-app="compilejs-builder">
+    <h2>Compile.js Build Tool</h2>
+    <h2>IN PROGRESS</h2>
 
-  <h3>In progress</h3>
+    <form class="pure-form">
+      <fieldset>
+        <legend>Compile your custom Compile.js</legend>
+        <div class="field" ng-controller="FieldController" ng-repeat="field in fields">
+          <select ng-options="m.name for m in methods" ng-model="field.method"></select>
 
+          <span class="input" ng-repeat="input in inputs">
+            <input ng-model="input.value"></input>
+          </span>
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="go-compile">
+      <button type="button" class="pure-button">Add Step</button>
+      <button type="button" class="pure-button">View Code</button>
+      <button type="button" class="pure-button pure-button-success">Compile</button>
+    </div>
+
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
+  <script src="../dist/compile.js"></script>
+  <script src="./index.js"></script>
 </body>
 </html>

@@ -12,8 +12,15 @@
   <script class="demo">
     compile
       .init()
-      .set('superagent', 'https://raw.github.com/visionmedia/superagent/master/superagent.js')
-      .download('superagent');
+      .set('lib-a', 'var a = 42;')
+      .set('lib-b', 'var b = 21;')
+      .run('concat', {
+        src: ['lib-a','lib-b'],
+        dest: 'lib-c'
+      })
+      .get('lib-c', function(lib) {
+        console.log(lib);
+      });
   </script>
 
 </body>

@@ -3,6 +3,7 @@
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
   <script src="../dist/compile.js"></script>
+  <script src="../dist/tasks/compile.coffee-script.js"></script>
 
   <!-- show demo code -->
   <script> $(function() { $("pre.demo").text( $("script.demo").html() ); }); </script>
@@ -12,8 +13,14 @@
   <script class="demo">
     compile
       .init()
-      .set('superagent', 'https://raw.github.com/visionmedia/superagent/master/superagent.js')
-      .download('superagent');
+      .set('lib.coffee', '../src/compile.coffee')
+      .run('coffee-script', {
+        src: 'lib.coffee',
+        dest: 'lib'
+      })
+      .get('lib', function(code) {
+        console.log(code);
+      });
   </script>
 
 </body>
