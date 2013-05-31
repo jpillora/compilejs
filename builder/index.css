@@ -12,6 +12,7 @@ body, html {
   padding: 10px;
   margin: 10px;
   border-radius: 10px;
+  clear: both;
 }
 
 .app .field select {
@@ -20,6 +21,20 @@ body, html {
 
 .app .field input {
   width: 150px;
+}
+
+.app .field .rights {
+  float: right;
+}
+.app .field .lefts {
+  float: left;
+}
+.app .field .rights button {
+  font-size: 70%;
+}
+
+.go-compile {
+  text-align: center;
 }
 
 .go-compile button {

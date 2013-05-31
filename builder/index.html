@@ -13,11 +13,17 @@
       <fieldset>
         <legend>Compile your custom Compile.js</legend>
         <div class="field" ng-controller="FieldController" ng-repeat="field in fields">
-          <select ng-options="m.name for m in methods" ng-model="field.method"></select>
+          <div class="lefts">
+            <select ng-options="m.name for m in methods" ng-model="field.method"></select>
 
-          <span class="input" ng-repeat="input in inputs">
-            <input ng-model="input.value"></input>
-          </span>
+            <span class="input" ng-repeat="input in inputs">
+              <input ng-model="input.value"></input>
+            </span>
+          </div>
+          <div class="rights">
+            <button type="button" class="pure-button">Edit</button>
+            <button type="button" class="pure-button">Delete</button>
+          </div>
         </div>
       </fieldset>
     </form>
