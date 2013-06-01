@@ -1,0 +1,5 @@
+[
+  { "method": "init", "args":["{ obj: true }"] },
+  { "method": "get", "args":["blah","http://.../"], "disabled":true },
+  { "method": "run", "args":["123","456"] }
+]

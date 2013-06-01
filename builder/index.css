@@ -4,24 +4,26 @@ body, html {
 
 .app {
   margin: 0 auto;
-  width: 600px;
+  max-width: 960px;
+  padding: 30px;
 }
 
 .app .field {
-  background: whiteSmoke;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 10px;
   clear: both;
 }
 
-.app .field select {
-  height: 30px;
+.app .box {
+  background: #EEE;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
 }
 
-.app .field input {
-  width: 150px;
+.app .disabled {
+  background: #CCC;
 }
+
+/* field container */
 
 .app .field .rights {
   float: right;
@@ -33,12 +35,70 @@ body, html {
   font-size: 70%;
 }
 
-.go-compile {
+
+/* field inputs */
+
+.app .disabled textarea,
+.app .disabled input {
+  color: #CCC;
+}
+
+.app .field select {
+  height: 30px;
+}
+
+.app .field textarea,
+.app .field input {
+  width: 150px;
+  border-color: #DDD;
+  border-radius: 5px;
+  height: 30px;
+  line-height: 25px;
+  font-size: 12px
+}
+
+.app .field textarea.json,
+.app .field textarea.fn {
+  /*height: 90px;*/
+  font-family: Courier
+}
+
+.app .field input.short {
+  width: 70px;
+}
+
+.app .field input.json,
+.app .field input.fn,
+.app .field textarea.short,
+.app .field textarea.medium {
+  display: none;
+}
+
+
+/* code container */
+.code {
+  padding: 0px 50px;
+}
+/* bottom control buttons*/
+
+.controls {
   text-align: center;
 }
 
-.go-compile button {
+.controls button {
   margin-right: 10px
+}
+
+/* extra */
+.clear:after {
+  clear: both;
+  content: ".";
+  display: block;
+  height: 0;
+  visibility: hidden
+}
+.clear {
+  zoom:1
 }
 
 .pure-button-success,

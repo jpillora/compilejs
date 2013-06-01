@@ -7,31 +7,52 @@
 <body>
   <div class="app" ng-app="compilejs-builder">
     <h2>Compile.js Build Tool</h2>
-    <h2>IN PROGRESS</h2>
 
     <form class="pure-form">
       <fieldset>
         <legend>Compile your custom Compile.js</legend>
-        <div class="field" ng-controller="FieldController" ng-repeat="field in fields">
-          <div class="lefts">
-            <select ng-options="m.name for m in methods" ng-model="field.method"></select>
 
-            <span class="input" ng-repeat="input in inputs">
-              <input ng-model="input.value"></input>
+        <div class="field box clear"
+             ng-repeat="field in fields"
+             ng-class="field.disabled && 'disabled'">
+          <div class="lefts">
+            <select ng-options="m.name for m in methods"
+                    ng-model="field.method"
+                    ng-change="update()"></select>
+
+            <span ng-repeat="input in field.method.inputs">
+              <textarea ng-class="input.type"
+                        ng-model="field.args[$index]"
+                        ng-change="update()"></textarea>
+              <input ng-class="input.type"
+                        ng-model="field.args[$index]"
+                        ng-change="update()"/>
             </span>
           </div>
           <div class="rights">
-            <button type="button" class="pure-button">Edit</button>
-            <button type="button" class="pure-button">Delete</button>
+            <button type="button" class="pure-button"
+                    ng-click="field.disabled = !field.disabled; update();"
+                    ng-bind="field.disabled && 'Enable' || 'Disable'"></button>
+            <button type="button" class="pure-button"
+                    ng-click="del($index)">Delete</button>
           </div>
         </div>
       </fieldset>
     </form>
 
-    <div class="go-compile">
-      <button type="button" class="pure-button">Add Step</button>
-      <button type="button" class="pure-button">View Code</button>
-      <button type="button" class="pure-button pure-button-success">Compile</button>
+    <div class="code box" ng-show="codeShown">
+      <pre ng-bind="code"></pre>
+
+    </div>
+
+    <div class="controls">
+      <button type="button" class="pure-button"
+              ng-click="addField()">Add Step</button>
+      <button type="button" class="pure-button"
+              ng-click="toggleCode()"
+              ng-bind="(codeShown && 'Hide' || 'View') + ' Code'"></button>
+      <button type="button" class="pure-button pure-button-success"
+              ng-click="run()">Run</button>
     </div>
 
   </div>
@@ -39,5 +60,6 @@
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
   <script src="../dist/compile.js"></script>
   <script src="./index.js"></script>
+
 </body>
 </html>

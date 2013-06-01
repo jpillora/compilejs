@@ -19,6 +19,27 @@ saveAs = (name, text) ->
   a.dispatchEvent event
   true
 
+#download proxy target
+$ -> $("<iframe name='compileJsDownloadTarget'></iframe>").hide().appendTo("body")
+
+class EventEmitter
+  constructor: (@parent = window)->
+    @events = {}
+
+  on: (event, callback) ->
+    unless @events[event]
+      @events[event] = []
+    @events[event].push callback
+    @parent
+
+  emit: ->
+    args = Array::slice.call arguments
+    event = args.shift()
+    callbacks = @events[event]
+    return unless callbacks
+    for callback in callbacks
+      callback.apply @parent, args
+    @parent
 
 #compliation class
 class Compilation
@@ -26,21 +47,8 @@ class Compilation
   constructor: ->
     #compilation wide values
     @values = {}
-    @events = {}
-
-  #private api
-  _on: (event, callback) ->
-    unless @events[event]
-      @events[event] = []
-    @events[event].push callback
-    @
-
-  _emit: (event, val)->
-    callbacks = @events[event]
-    return unless callbacks
-    for callback in callbacks
-      callback.call @, val
-    @
+    #compilation wide event emitter
+    @_ee = new EventEmitter @
 
   _ajax: (url, callback) ->
     #jquery version though could be swapped out...
@@ -52,6 +60,7 @@ class Compilation
         return @_error "ajax: #{msg}" if status is 'error'
         callback body
     else
+      @_log "jsonp request for: #{url}"
       $.ajax({
         url: 'http://compilejs.jpillora.com/retrieve',
         data: {url}
@@ -82,28 +91,29 @@ class Compilation
 
     timeout = setTimeout =>
       @_warn "get: timeout waiting for '#{name}'"
-    , 3*1000
+    , 8*1000
 
     doCallback = =>
-      @_emit "get:value:#{name}"
+      @_ee.emit "get:value:#{name}"
       clearTimeout timeout
       callback @values[name]
 
     if @values[name]
       setTimeout doCallback, 0
     else
-      @_on "set:value:#{name}", doCallback
+      @_ee.on "set:value:#{name}", doCallback
 
     @
 
   set: (name, str) ->
 
+    @_log "setting #{name}"
     if @values[name]
       return @_error "set: '#{name}' already exists"
 
     doCallback = (val) =>
       @values[name] = val
-      @_emit "set:value:#{name}"
+      @_ee.emit "set:value:#{name}"
 
     #if spaces or curlys then is code string
     if /[\s\{\}]/.test str
@@ -114,12 +124,22 @@ class Compilation
     @
 
   download: (name) ->
+    @_log "downloading #{name}"
     @get name, (val) =>
-      return if saveAs("#{name}.js",val)
-      $("<form method='post'></form>")
+      if saveAs("#{name}.js",val)
+        @_log "native download"
+        return
+
+      form = $("<form method='post' target='compileJsDownloadTarget'></form>")
+        .hide()
         .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(name)}.js")
-        .append($("<textarea name='__compilejsDownload'></textarea>").html(val))
+        .append($("<textarea name='__compilejsDownload'></textarea>").text(val))
+        .appendTo("body")
         .submit()
+
+      setTimeout form.remove, 1000
+
+      @_log "replay download"
     @
 
   run: (name, config) ->
@@ -157,23 +177,25 @@ class Compilation
     checkScripts()
     @
 
+  options: ->
+    throw "Not implemented"
+
 #add public and private chainable error,warn,log functions
 cons = {}
 $.each ['log', 'error', 'warn'], (i, fn) ->
   cons[fn] = ->
+    return if /MSIE/.test window.navigator.userAgent
     console[fn].apply console, ['Compile.js:'].concat Array::slice.call arguments
   Compilation::[fn] = (callback) ->
-    @_on fn, callback; @
+    @_ee.on fn, callback; @
   Compilation::['_'+fn] = (str) ->
-    cons[fn] str; @_emit fn, str; @
+    cons[fn] str; @_ee.emit fn, str; @
 
 #library wide tasks
 tasks = {}
 
 #public api
 compile =
-  init: ->
-    new Compilation
   tasks: tasks
   task: (name, def) ->
     if tasks[name]
@@ -184,6 +206,12 @@ compile =
       return cons.error "task: '#{name}' Missing run function"
     # cons.log "task: add '#{name}'"
     tasks[name] = def
+
+#create static versions of public methods which start the chain
+$.each ['log', 'error', 'warn', 'get', 'set', 'download', 'run'], (i, fn) ->
+  compile[fn] = ->
+    inst = new Compilation
+    inst[fn].apply inst, arguments
 
 #in-built concat task
 compile.task 'concat', (config, callback) ->
