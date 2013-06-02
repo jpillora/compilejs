@@ -127,9 +127,9 @@ If `definition` is:
 
 #### (Task list)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks]
 
-* Concat - (Built-in)[https://github.com/jpillora/compilejs/blob/gh-pages/src/compile.coffee#L232]
-* CoffeeScript - (compile.coffee-script.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
-* Uglify - (compile.uglify.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
+* Concat - [Built-in](https://github.com/jpillora/compilejs/blob/gh-pages/src/compile.coffee#L232)
+* CoffeeScript - [compile.coffee-script.js](https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js)
+* Uglify - [compile.uglify.js](https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js)
 * *More to come...*
 
 
