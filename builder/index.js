@@ -1,7 +1,7 @@
 
 var App = angular.module('compilejs-builder', []);
 
-App.run(function($rootScope) {
+App.run(function($rootScope, $timeout) {
   App.root = $rootScope;
 
   $rootScope.codeShown = false;
@@ -14,10 +14,6 @@ App.run(function($rootScope) {
   };
 
   $rootScope.methods = [
-    { name: 'init',
-      inputs: [
-        {type:'json', placeholder: 'configuration object'}
-      ] },
     { name: 'get',
       inputs: [
         {type:'short', placeholder: 'value name'},
@@ -36,25 +32,20 @@ App.run(function($rootScope) {
     { name: 'download',
       inputs: [
         {type:'short', placeholder: 'value name'}
+      ] },
+    { name: 'options',
+      inputs: [
+        {type:'json', placeholder: 'configuration object'}
       ] }
   ];
 
   $rootScope.fields = [];
 
-  //grab the method objects
-  $rootScope.loadFields = function(fields) {
-    $rootScope.fields = $.map(fields, function(f) {
-      f.method = $rootScope.getMethod(f.method);
-    });
-  };
-
-  $.each($rootScope.fields, function(i, f) {
-    f.method = $rootScope.getMethod(f.method);
-  });
-
   $rootScope.addField = function() {
     $rootScope.fields.push({ method: null, args: [] });
-    $rootScope.updateCode();
+
+    $timeout($rootScope.update, 10);
+
   };
 
   $rootScope.toggleCode = function() {
@@ -64,7 +55,7 @@ App.run(function($rootScope) {
 
   $rootScope.updateCode = function() {
 
-    var fields = [];
+    var code = "compile";
 
     $.each($rootScope.fields, function(i, f) {
 
@@ -74,14 +65,26 @@ App.run(function($rootScope) {
 
       var args = [];
       $.each(f.args, function(i, arg) {
-        var type = method.inputs[i];
-        args.push(JSON.stringify(arg));
+        var input = method.inputs[i];
+        var str = null;
+        if(input.type === 'json' ||
+           input.type === 'fn') {
+          try {
+            new Function("("+arg+")");
+          } catch(e) {
+            return;
+          }
+          str = arg.replace(/\n/gm, '\n  ');
+        } else {
+          str = JSON.stringify(arg);
+        }
+        args.push(str);
       });
 
-      fields.push("  " + method.name + "(" + args.join(", ") + ")");
+      code += ".\n  " + method.name + "(" + args.join(", ") + ")";
     });
 
-    $rootScope.code = "compile.\n" + fields.join(".\n");
+    $rootScope.code = code;
   };
 
 
@@ -89,12 +92,80 @@ App.run(function($rootScope) {
     console.log("run");
   };
 
-  $rootScope.update = function() {
-    $rootScope.updateCode();
-  };
-
   $rootScope.del = function(index) {
     $rootScope.fields.splice(index, 1);
+  };
+
+  $rootScope.update = function() {
+    $rootScope.updateCode();
+    $rootScope.updateEditors();
+  };
+
+  $rootScope.updateEditors = function() {
+    $("textarea:not(.codemirrored):visible").each(function() {
+      CodeMirror.fromTextArea(this, {
+        lineNumbers: true,
+        viewportMargin: Infinity
+      });
+      $(this).addClass("codemirrored");
+    });
+  };
+});
+
+App.controller('ConfigController', function($scope, $rootScope, $timeout) {
+
+  $rootScope.configCtrl = $scope;
+
+  $scope.preset = null;
+  $scope.showImport = false;
+
+  $scope.presets = [
+    { name: "Compile.js", file: "compilejs"},
+    { name: "Minify Compile.js", file: "compilejs-min"}
+  ];
+
+  $scope.updatedPreset = function() {
+    if(!$scope.preset) return;
+    $.getJSON("presets/" + $scope.preset.file + ".json", $scope.loadFields);
+    $scope.preset = null;
+  };
+
+  //grab the method objects
+  $scope.loadFields = function(fields) {
+    if(!$.isArray(fields)) {
+      alert("Fields must be an array");
+      return;
+    }
+    var fs = [];
+    $.each(fields, function(i, f) {
+      f.method = $scope.getMethod(f.method);
+      fs.push(f);
+    });
+    $rootScope.fields = fs;
+    $timeout(function() {
+      $rootScope.update();
+      $rootScope.$apply();
+    });
+  };
+
+  $scope.export = function() {
+    str = JSON.stringify(App.root.fields, function(k,v) {
+      if(k === "method") return v.name;
+      if(/^\$/.test(k)) return;
+      return v;
+    }, 2);
+    compile.set('data', str).download('data', 'export.json');
+  };
+
+  $scope.import = function() {
+    var fields = null;
+    try {
+      fields = JSON.parse($scope.importData);
+    } catch(e) {
+      alert("Invalid JSON");
+      return;
+    }
+    $scope.loadFields(fields);
   };
 
 });

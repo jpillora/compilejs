@@ -1,0 +1,5 @@
+[
+  { "method": "set", "args":["lib","../dist/compile.js"] },
+
+  { "method": "run", "args":["minify","{ some: \"config\" }"] }
+]

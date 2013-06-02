@@ -8,9 +8,7 @@ body, html {
   padding: 30px;
 }
 
-.app .field {
-  clear: both;
-}
+/* reusables */
 
 .app .box {
   background: #EEE;
@@ -23,15 +21,26 @@ body, html {
   background: #CCC;
 }
 
-/* field container */
-
-.app .field .rights {
+.app .right {
   float: right;
 }
-.app .field .lefts {
+.app .left {
   float: left;
 }
-.app .field .rights button {
+
+.app .clear:after {
+  clear: both;
+  content: ".";
+  display: block;
+  height: 0;
+  visibility: hidden
+}
+.app .clear {
+  zoom:1
+}
+/* field container */
+
+.app .right button {
   font-size: 70%;
 }
 
@@ -57,8 +66,8 @@ body, html {
   font-size: 12px
 }
 
-.app .field textarea.json,
-.app .field textarea.fn {
+.app .field textarea,
+.app .field input {
   /*height: 90px;*/
   font-family: Courier
 }
@@ -70,10 +79,16 @@ body, html {
 .app .field input.json,
 .app .field input.fn,
 .app .field textarea.short,
-.app .field textarea.medium {
+.app .field textarea.long {
   display: none;
 }
 
+/* no steps */
+.no-steps {
+  font-style: italic;
+  font-size: 0.75em;
+  padding: 20px;
+}
 
 /* code container */
 .code {
@@ -86,20 +101,35 @@ body, html {
 }
 
 .controls button {
-  margin-right: 10px
+  margin: 5px
 }
 
-/* extra */
-.clear:after {
-  clear: both;
-  content: ".";
-  display: block;
-  height: 0;
-  visibility: hidden
+/* config ctrl */
+div[ng-controller=ConfigController] {
+  padding-top: 20px;
 }
-.clear {
-  zoom:1
+
+.importer {
+  opacity: 0.9;
+  background: whiteSmoke;
+  text-align: center;
+  position: absolute;
+  margin: 20px;
+  top: 0;
+  right: 0;
+  width: 500px;
+  height: 300px;
 }
+.importer textarea {
+  width: 400px;
+  height: 200px;
+  font-family: Courier;
+}
+.importer button {
+  margin: 10px;
+}
+
+/* purecss customisations */
 
 .pure-button-success,
 .pure-button-error,
@@ -112,4 +142,15 @@ body, html {
 
 .pure-button-success {
   background: rgb(76, 201, 71); /* this is a green */
+}
+
+
+/* CodeMirror customisations */
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
 }

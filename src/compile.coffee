@@ -123,16 +123,16 @@ class Compilation
 
     @
 
-  download: (name) ->
+  download: (name, filename = "#{name}.js") ->
     @_log "downloading #{name}"
     @get name, (val) =>
-      if saveAs("#{name}.js",val)
+      if saveAs(filename,val)
         @_log "native download"
         return
 
       form = $("<form method='post' target='compileJsDownloadTarget'></form>")
         .hide()
-        .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(name)}.js")
+        .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(filename)}")
         .append($("<textarea name='__compilejsDownload'></textarea>").text(val))
         .appendTo("body")
         .submit()

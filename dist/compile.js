@@ -176,18 +176,21 @@
       return this;
     };
 
-    Compilation.prototype.download = function(name) {
+    Compilation.prototype.download = function(name, filename) {
       var _this = this;
 
+      if (filename == null) {
+        filename = "" + name + ".js";
+      }
       this._log("downloading " + name);
       this.get(name, function(val) {
         var form;
 
-        if (saveAs("" + name + ".js", val)) {
+        if (saveAs(filename, val)) {
           _this._log("native download");
           return;
         }
-        form = $("<form method='post' target='compileJsDownloadTarget'></form>").hide().attr('action', "http://compilejs.jpillora.com/download?filename=" + (encodeURIComponent(name)) + ".js").append($("<textarea name='__compilejsDownload'></textarea>").text(val)).appendTo("body").submit();
+        form = $("<form method='post' target='compileJsDownloadTarget'></form>").hide().attr('action', "http://compilejs.jpillora.com/download?filename=" + (encodeURIComponent(filename))).append($("<textarea name='__compilejsDownload'></textarea>").text(val)).appendTo("body").submit();
         setTimeout(form.remove, 1000);
         return _this._log("replay download");
       });

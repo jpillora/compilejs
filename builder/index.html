@@ -1,21 +1,57 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Compile.js Build Tool</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.12.0/codemirror.min.css">
   <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.1.0/pure-min.css">
   <link rel="stylesheet" href="./index.css">
+  <style type="text/css">[ng-cloak] { display: none; }</style>
 </head>
 <body>
-  <div class="app" ng-app="compilejs-builder">
-    <h2>Compile.js Build Tool</h2>
+
+  <div class="app" ng-cloak ng-app="compilejs-builder">
+    <div class="clear">
+      <div class="left">
+        <h2>Compile.js Build Tool</h2>
+      </div>
+      <div class="right" ng-controller="ConfigController">
+        <select class="presets"
+                ng-options="p.name for p in presets"
+                ng-model="preset"
+                ng-change="updatedPreset()">
+          <option value="">Choose Preset</option>
+        </select>
+        <button type="button" class="pure-button"
+                ng-click="export()">Export</button>
+        <button type="button" class="pure-button"
+                ng-click="showImport = !showImport">Import</button>
+
+        <div class="importer" ng-show="showImport">
+          <div><textarea ng-model="importData"></textarea></div>
+          <div>
+          <button type="button" class="pure-button"
+                ng-click="import()">Import</button>
+          <button type="button" class="pure-button"
+                ng-click="showImport = false">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <form class="pure-form">
       <fieldset>
-        <legend>Compile your custom Compile.js</legend>
+
+        <legend >Compile your custom Compile.js</legend>
+
+        <div class="no-steps"
+             ng-show="fields.length == 0">
+          You have no compile steps yet. Click "Add Step" below.
+        </div>
 
         <div class="field box clear"
              ng-repeat="field in fields"
              ng-class="field.disabled && 'disabled'">
-          <div class="lefts">
+          <div class="left">
             <select ng-options="m.name for m in methods"
                     ng-model="field.method"
                     ng-change="update()"></select>
@@ -25,11 +61,11 @@
                         ng-model="field.args[$index]"
                         ng-change="update()"></textarea>
               <input ng-class="input.type"
-                        ng-model="field.args[$index]"
-                        ng-change="update()"/>
+                     ng-model="field.args[$index]"
+                     ng-change="update()"/>
             </span>
           </div>
-          <div class="rights">
+          <div class="right">
             <button type="button" class="pure-button"
                     ng-click="field.disabled = !field.disabled; update();"
                     ng-bind="field.disabled && 'Enable' || 'Disable'"></button>
@@ -58,6 +94,7 @@
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.4/angular.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/3.12.0/codemirror.min.js"></script>
   <script src="../dist/compile.js"></script>
   <script src="./index.js"></script>
 
