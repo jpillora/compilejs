@@ -17,7 +17,8 @@
         <select class="presets"
                 ng-options="p.name for p in presets"
                 ng-model="preset"
-                ng-change="updatedPreset()">
+                ng-change="updatedPreset()"
+                ng-disabled="!!preset">
           <option value="">Choose Preset</option>
         </select>
         <button type="button" class="pure-button"
@@ -40,7 +41,7 @@
     <form class="pure-form">
       <fieldset>
 
-        <legend >Compile your custom Compile.js</legend>
+        <legend >Build your custom Compile.js</legend>
 
         <div class="no-steps"
              ng-show="fields.length == 0">

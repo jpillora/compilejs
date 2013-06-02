@@ -98,6 +98,7 @@ App.run(function($rootScope, $timeout) {
     try {
       eval($rootScope.code);
     } catch(e) {
+      console.error("This shouldn't happen....", e);
     }
   };
 
@@ -122,9 +123,8 @@ App.controller('ConfigController', function($scope, $rootScope, $timeout) {
 
   $rootScope.configCtrl = $scope;
 
-  $scope.preset = null;
   $scope.showImport = false;
-
+  $scope.preset = null;
   $scope.presets = [
     { name: "Compile.js", file: "compilejs"},
     { name: "Minify Compile.js", file: "compilejs-min"}
@@ -132,8 +132,10 @@ App.controller('ConfigController', function($scope, $rootScope, $timeout) {
 
   $scope.updatedPreset = function() {
     if(!$scope.preset) return;
-    $.getJSON("presets/" + $scope.preset.file + ".json", $scope.loadFields);
-    $scope.preset = null;
+    $.getJSON("presets/" + $scope.preset.file + ".json").always(function(data) {
+      $scope.loadFields(data);
+      $scope.preset = null;
+    });
   };
 
   //grab the method objects
@@ -155,12 +157,11 @@ App.controller('ConfigController', function($scope, $rootScope, $timeout) {
   };
 
   $scope.export = function() {
-    str = JSON.stringify(App.root.fields, function(k,v) {
+    compile.set('data', JSON.stringify(App.root.fields, function(k,v) {
       if(k === "method") return v.name;
       if(/^\$/.test(k)) return;
       return v;
-    }, 2);
-    compile.set('data', str).download('data', 'export.json');
+    }, 2)).download('data', 'export.json');
   };
 
   $scope.import = function() {
@@ -168,8 +169,7 @@ App.controller('ConfigController', function($scope, $rootScope, $timeout) {
     try {
       fields = JSON.parse($scope.importData);
     } catch(e) {
-      alert("Invalid JSON");
-      return;
+      return alert("Invalid JSON");
     }
     $scope.loadFields(fields);
   };
