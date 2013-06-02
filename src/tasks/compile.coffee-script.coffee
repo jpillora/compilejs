@@ -10,6 +10,6 @@ compile.task 'coffee-script',
     catch e
       callback "coffee-script: #{e.toString()}"
       return
-    @set config.dest, out
+    @set config.dest, out, true
     callback()
 

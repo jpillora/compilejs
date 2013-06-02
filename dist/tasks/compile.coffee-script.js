@@ -14,7 +14,7 @@
         callback("coffee-script: " + (e.toString()));
         return;
       }
-      this.set(config.dest, out);
+      this.set(config.dest, out, true);
       return callback();
     }
   });

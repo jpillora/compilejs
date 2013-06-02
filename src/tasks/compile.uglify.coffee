@@ -2,7 +2,7 @@
 compile.task 'uglify',
 
   fetch:
-    UglifyJS: "//github.com/jpillora/compilejs/raw/gh-pages/vendor/uglify.js"
+    UglifyJS: "//github.com/jpillora/compilejs/raw/gh-pages/vendor/uglify.min.js"
 
   init: ->
     #uglify doesnt come with a minify function for some reason...
@@ -51,6 +51,6 @@ compile.task 'uglify',
     catch e
       callback "uglify: parse error: '#{e.message}' on line: #{e.line} col: #{e.col}"
       return
-    @set config.dest, out
+    @set config.dest, out, true
     callback()
 

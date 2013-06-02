@@ -2,12 +2,12 @@
 #native JSON fallback to jQuery
 parseJSON = JSON?.parse or $.parseJSON
 
-#url regex  (http://mathiasbynens.be/demo/url-regex)
-urlRe = /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.‌​\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[‌​6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1‌​,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00‌​a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u‌​00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?$/i
-
 #helpers
 isArray = (obj) ->
   Object::toString.call(obj) is '[object Array]'
+
+guid = ->
+  (Math.random()*Math.pow(2,32)).toString 16
 
 #chrome a.download
 saveAs = (name, text) ->
@@ -27,7 +27,8 @@ encode = (str) ->
   encode.elem.text(str).html()
 
 #download proxy target
-$ -> $("<iframe name='compileJsDownloadTarget'></iframe>").hide().appendTo("body")
+iframeName = guid()+guid()
+$ -> $("<iframe name='#{iframeName}'></iframe>").hide().appendTo("body")
 
 class EventEmitter
   constructor: (@parent = window)->
@@ -53,7 +54,9 @@ class Compilation
 
   constructor: ->
     #compilation wide values
+    # @id = guid()
     @values = {}
+
     #compilation wide event emitter
     @_ee = new EventEmitter @
 
@@ -121,7 +124,7 @@ class Compilation
       @values[name] = val
       @_ee.emit "set:value:#{name}"
 
-    isRaw = /\s/.test(str) if isRaw is `undefined`
+    isRaw = /\s/.test(str) or not str if isRaw is `void 0`
 
     #if spaces or curlys then is code string
     if isRaw
@@ -138,7 +141,7 @@ class Compilation
         @_log "native download"
         return
 
-      form = $("<form method='post' target='compileJsDownloadTarget'></form>")
+      form = $("<form method='post' target='#{iframeName}'></form>")
         .hide()
         .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(filename)}")
         .append($("<textarea name='__compilejsDownload'></textarea>").text(val))
@@ -170,7 +173,8 @@ class Compilation
       task.run.call @, config, (err) =>
         @_error "run: #{name}: #{err}" if err
 
-    gotScripts = =>      if config.src
+    gotScripts = =>
+      if config.src
         @get config.src, gotSrc
       else
         setTimeout gotSrc, 0
@@ -222,22 +226,23 @@ compile =
 
 #create static versions of public methods which start the chain
 $.each ['log', 'error', 'warn',
-        'get', 'set', 'download', 'run', 'popup'], (i, fn) ->
+        'get', 'set', 'download',
+        'run', 'popup'], (i, fn) ->
   compile[fn] = ->
     inst = new Compilation
     inst[fn].apply inst, arguments
 
 #in-built concat task
 compile.task 'concat', (config, callback) ->
-  @set config.dest,
-    if typeof config.src is 'string' then config.src else
-    if $.isArray config.src config.src.join(config.sep || '\n') else
-    null
+
+  val = if typeof config.src is 'string'
+    config.src
+  else if $.isArray config.src
+    config.src.join(config.sep || '\n')
+
+  @set config.dest, val, true
+
+
 
 #publicise
-if typeof exports is "object"
-  module.exports = compile
-else if typeof define is "function" && define.amd
-  define ['jquery'], ($) -> $.compile = compile
-else
-  $.compile = compile
+@compile = compile

@@ -2,7 +2,7 @@
 (function() {
   compile.task('uglify', {
     fetch: {
-      UglifyJS: "//github.com/jpillora/compilejs/raw/gh-pages/vendor/uglify.js"
+      UglifyJS: "//github.com/jpillora/compilejs/raw/gh-pages/vendor/uglify.min.js"
     },
     init: function() {
       UglifyJS.minify = function(codes, options) {
@@ -57,7 +57,7 @@
         callback("uglify: parse error: '" + e.message + "' on line: " + e.line + " col: " + e.col);
         return;
       }
-      this.set(config.dest, out);
+      this.set(config.dest, out, true);
       return callback();
     }
   });
