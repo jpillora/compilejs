@@ -1,5 +1,5 @@
 [
   { "method": "set", "args":["lib","../dist/compile.js"] },
-
-  { "method": "run", "args":["minify","{ some: \"config\" }"] }
+  { "method": "run", "args":["uglify", "{ src: \"lib\", dest: \"lib.min\" }"] },
+  { "method": "download", "args":["lib.min"] }
 ]

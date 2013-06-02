@@ -1,0 +1,19 @@
+<html>
+<body>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
+  <script src="../dist/compile.js"></script>
+
+  <!-- show demo code -->
+  <script> $(function() { $("pre.demo").text( $("script.demo").html() ); }); </script>
+  <pre class="demo"> </pre>
+
+  <!-- demo code -->
+  <script class="demo">
+    compile
+      .set('lib', '../dist/compile.js')
+      .popup('lib');
+  </script>
+
+</body>
+</html>

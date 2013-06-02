@@ -33,6 +33,10 @@ App.run(function($rootScope, $timeout) {
       inputs: [
         {type:'short', placeholder: 'value name'}
       ] },
+    { name: 'popup',
+      inputs: [
+        {type:'short', placeholder: 'value name'}
+      ] },
     { name: 'options',
       inputs: [
         {type:'json', placeholder: 'configuration object'}
@@ -41,11 +45,12 @@ App.run(function($rootScope, $timeout) {
 
   $rootScope.fields = [];
 
+  $rootScope.$watch('fields', function() {
+    $timeout($rootScope.update, 100);
+  });
+
   $rootScope.addField = function() {
     $rootScope.fields.push({ method: null, args: [] });
-
-    $timeout($rootScope.update, 10);
-
   };
 
   $rootScope.toggleCode = function() {
@@ -66,6 +71,7 @@ App.run(function($rootScope, $timeout) {
       var args = [];
       $.each(f.args, function(i, arg) {
         var input = method.inputs[i];
+        if(!input) return;
         var str = null;
         if(input.type === 'json' ||
            input.type === 'fn') {
@@ -89,7 +95,10 @@ App.run(function($rootScope, $timeout) {
 
 
   $rootScope.run = function() {
-    console.log("run");
+    try {
+      eval($rootScope.code);
+    } catch(e) {
+    }
   };
 
   $rootScope.del = function(index) {
@@ -102,12 +111,9 @@ App.run(function($rootScope, $timeout) {
   };
 
   $rootScope.updateEditors = function() {
-    $("textarea:not(.codemirrored):visible").each(function() {
-      CodeMirror.fromTextArea(this, {
-        lineNumbers: true,
-        viewportMargin: Infinity
-      });
-      $(this).addClass("codemirrored");
+    $("textarea:not(.resizing):visible").each(function() {
+      $(this).autosize();
+      $(this).addClass("resizing");
     });
   };
 });

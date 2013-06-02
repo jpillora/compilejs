@@ -28,7 +28,6 @@ Minify your library with [UglifyJS2](https://github.com/mishoo/UglifyJS2)
 
 ``` javascript
 compile
-  .init()
   .set('lib', 'js/my-lib.js')
   .run('uglify', {
     src: 'lib',
@@ -46,62 +45,70 @@ compile
 
 *Note: This API is subject to change*
 
-Creates a new task
-
-##### compile.`init( options )`
-
-*Note: No options yet (though you may post a feature request!)*
-
-Returns a Compile.js `instance`
-
-##### `instance`.`get( name[s], callback( err, value[s] ) )`
+##### `compile`.`get( name[s], callback( err, value[s] ) )`
 
 Get a value
 
-* `name` must be a string or an array of strings
+* `name[s]` - string or an array of strings
 
-##### `instance`.`set( name, value )`
+* `value[s]` - will be the same type as `name[s]`
+
+##### `compile`.`set( name, value )`
 
 Set a value.
 
-* `name` must be a string
-* `value` must be a string
+* `name` - string
+* `value` - string
+* `isRaw` - boolean [optional] - defaults to `value contains a space`
 
-*Note: `value` will be seen as a URL and then retrieved if
-it doesn't have any `space`, `{` or `}` characters.
-URLs will be retrieved with AJAX if they're on the same origin as the script,
-otherwise they will be retrieved using the Compile.js JSONP proxy server (No SLA provided :smile:)*
+*Note: `value` will be seen as a URL and then fetched if
+it does not contain any `space` characters.*
 
-##### `instance`.`run( taskName, taskConfig )`
+*Note: a URL will be retrieved with an XHR request if it is on the same origin as the current page, otherwise it will be retrieved using the Compile.js JSONP proxy server*
+
+##### `compile`.`run( taskName, taskConfig )`
 
 Runs the given task with the given config
 
-* `taskName` must be a string
-* `taskConfig` must be an object
+* `taskName` - string
+* `taskConfig` - object
 
-##### `instance`.`download( name )`
+##### `compile`.`download( name )`
 
-Downloads the value of `name` as `<name>.js`
+Downloads the value of `name` as `filename`
 
-* `name` must be a string
+* `name` - string
+* `filename` - string [optional] - defaults to "`name`.js"
 
 *Note: On browsers that do not support [anchor download attribute](http://caniuse.com/download), the download
 will be forced by POSTing the contents of the file to the Compile.js POST replay server which
 will just return the content though with the `Content-Disposition` header set.*
 
-##### `instance`.`log( callback ( string ) )`
+##### `compile`.`popup( name )`
 
-Log handler (defaults to pipe to `console.log`)
+Open a small popup with the value of `name`
 
-##### `instance`.`error( callback ( string ) )`
+* `name` - string
 
-Error handler (defaults to pipe to `console.error`)
+*Warning: This will likely trigger a popup warning from most modern browsers*
 
-##### `instance`.`warn( callback ( string ) )`
+##### `compile`.`log( callback ( string ) )`
 
-Warning handler (defaults to pipe to `console.warn`)
+Log handler
+
+##### `compile`.`error( callback ( string ) )`
+
+Error handler
+
+##### `compile`.`warn( callback ( string ) )`
+
+Warning handler
+
+#### Tasks
 
 ##### compile.`task( taskName, definition )`
+
+Adds a new task
 
 If `definition` is:
 
@@ -118,8 +125,15 @@ If `definition` is:
   * an optional `fetch` object - which map global names to URLs, missing globals will be fetched.
   * an optional `init` function - which will run once all URLs have been fetched.
 
-#### Tasks
+##### (Task list)[./tree/gh-pages/dist/tasks]
 
-Task list in progress...
+* Concat - Built-in
+* CoffeeScript - (compile.coffee-script.js)[./tree/gh-pages/dist/tasks/compile.coffee-script.js]
+* Uglify - (compile.uglify.js)[./tree/gh-pages/dist/tasks/compile.coffee-script.js]
+* *More to come...*
+
+
+
+
 
 

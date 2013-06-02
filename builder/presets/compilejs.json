@@ -1,0 +1,4 @@
+[
+  { "method": "set", "args":["lib","../dist/compile.js"] },
+  { "method": "popup", "args":["lib"] }
+]

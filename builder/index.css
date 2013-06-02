@@ -52,34 +52,31 @@ body, html {
   color: #CCC;
 }
 
-.app .field select {
-  height: 30px;
-}
-
 .app .field textarea,
 .app .field input {
-  width: 150px;
+  width: 300px;
   border-color: #DDD;
   border-radius: 5px;
-  height: 30px;
   line-height: 25px;
-  font-size: 12px
+  font-size: 12px;
+  font-family: Courier;
 }
-
-.app .field textarea,
+.app .field textarea {
+  height: 30px;
+}
+.app .field button,
+.app .field select,
 .app .field input {
-  /*height: 90px;*/
-  font-family: Courier
+  height: 35px;
 }
 
 .app .field input.short {
   width: 70px;
 }
-
 .app .field input.json,
 .app .field input.fn,
-.app .field textarea.short,
-.app .field textarea.long {
+.app .field input.long,
+.app .field textarea.short{
   display: none;
 }
 
