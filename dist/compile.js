@@ -165,7 +165,7 @@
       var doCallback,
         _this = this;
 
-      this._log("setting " + name);
+      this._log("set " + name);
       if (this.values[name]) {
         return this._error("set: '" + name + "' already exists");
       }

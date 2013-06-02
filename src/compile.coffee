@@ -113,14 +113,13 @@ class Compilation
     @
 
   set: (name, str, isRaw) ->
-    @_log "setting #{name}"
+    @_log "set #{name}"
     if @values[name]
       return @_error "set: '#{name}' already exists"
 
     doCallback = (val) =>
       @values[name] = val
       @_ee.emit "set:value:#{name}"
-
 
     isRaw = /\s/.test(str) if isRaw is `undefined`
 

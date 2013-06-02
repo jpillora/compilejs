@@ -115,7 +115,7 @@ If `definition` is:
 * a string, it will be treated as a script URL and attempt to load it.
 * a function, it must have the signature `function(config, callback)`
   * `config` will contain the object the user provides
-      * *Note: the `src` property will be passed through `instance`.`get()` and
+      * `config.src` *Note: the `src` property will be passed through `instance`.`get()` and
          when this function is executed, `config.src` will be the the `value[s]`
          associated with the `name[s]`*
   * `callback` must be called when the task is complete
@@ -127,7 +127,7 @@ If `definition` is:
 
 #### (Task list)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks]
 
-* Concat - Built-in
+* Concat - (Built-in)[https://github.com/jpillora/compilejs/blob/gh-pages/src/compile.coffee#L232]
 * CoffeeScript - (compile.coffee-script.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
 * Uglify - (compile.uglify.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
 * *More to come...*
