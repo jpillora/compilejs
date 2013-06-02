@@ -116,8 +116,8 @@ If `definition` is:
 * a function, it must have the signature `function(config, callback)`
   * `config` will contain the object the user provides
     * *Note: the `src` property will be passed through `instance`.`get()` and
-      when this function is executed, `config.src` will be the the `value[s]`
-      associated with the `name[s]`
+       when this function is executed, `config.src` will be the the `value[s]`
+       associated with the `name[s]`*
   * `callback` must be called when the task is complete
 
 * If `definition` is a object, it must contain:
@@ -125,11 +125,11 @@ If `definition` is:
   * an optional `fetch` object - which map global names to URLs, missing globals will be fetched.
   * an optional `init` function - which will run once all URLs have been fetched.
 
-##### (Task list)[./tree/gh-pages/dist/tasks]
+##### (Task list)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks]
 
 * Concat - Built-in
-* CoffeeScript - (compile.coffee-script.js)[./tree/gh-pages/dist/tasks/compile.coffee-script.js]
-* Uglify - (compile.uglify.js)[./tree/gh-pages/dist/tasks/compile.coffee-script.js]
+* CoffeeScript - (compile.coffee-script.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
+* Uglify - (compile.uglify.js)[https://github.com/jpillora/compilejs/tree/gh-pages/dist/tasks/compile.coffee-script.js]
 * *More to come...*
 
 
