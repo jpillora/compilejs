@@ -40,12 +40,20 @@ class EventEmitter
     @events[event].push callback
     @parent
 
+  once: (event, callback) ->
+    console.log 'once', event
+    @on event, =>
+      i = @events[event].indexOf callback
+      @events[event].splice 1, i
+      callback.apply @parent, arguments
+
   emit: ->
     args = Array::slice.call arguments
     event = args.shift()
     callbacks = @events[event]
     return unless callbacks
     for callback in callbacks
+      console.log 'emit', event
       callback.apply @parent, args
     @parent
 
@@ -111,12 +119,12 @@ class Compilation
     if @values[name]
       setTimeout doCallback, 0
     else
-      @_ee.on "set:value:#{name}", doCallback
+      @_ee.once "set:value:#{name}", doCallback
 
     @
 
   set: (name, str, isRaw) ->
-    @_log "set #{name}"
+    @_log "set #{name}", @values
     if @values[name]
       return @_error "set: '#{name}' already exists"
 

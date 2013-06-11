@@ -58,6 +58,19 @@
       return this.parent;
     };
 
+    EventEmitter.prototype.once = function(event, callback) {
+      var _this = this;
+
+      console.log('once', event);
+      return this.on(event, function() {
+        var i;
+
+        i = _this.events[event].indexOf(callback);
+        _this.events[event].splice(1, i);
+        return callback.apply(_this.parent, arguments);
+      });
+    };
+
     EventEmitter.prototype.emit = function() {
       var args, callback, callbacks, event, _i, _len;
 
@@ -69,6 +82,7 @@
       }
       for (_i = 0, _len = callbacks.length; _i < _len; _i++) {
         callback = callbacks[_i];
+        console.log('emit', event);
         callback.apply(this.parent, args);
       }
       return this.parent;
@@ -160,7 +174,7 @@
       if (this.values[name]) {
         setTimeout(doCallback, 0);
       } else {
-        this._ee.on("set:value:" + name, doCallback);
+        this._ee.once("set:value:" + name, doCallback);
       }
       return this;
     };
@@ -169,7 +183,7 @@
       var doCallback,
         _this = this;
 
-      this._log("set " + name);
+      this._log("set " + name, this.values);
       if (this.values[name]) {
         return this._error("set: '" + name + "' already exists");
       }
