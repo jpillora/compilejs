@@ -14,6 +14,11 @@ App.run(function($rootScope, $timeout) {
   };
 
   $rootScope.methods = [
+    { name: 'fetch',
+      inputs: [
+        {type:'short', placeholder: 'value name'},
+        {type:'short', placeholder: 'path/to/file.js'}
+      ] },
     { name: 'get',
       inputs: [
         {type:'short', placeholder: 'value name'},
@@ -60,7 +65,7 @@ App.run(function($rootScope, $timeout) {
 
   $rootScope.updateCode = function() {
 
-    var code = "compile";
+    var code = "$.compile";
 
     $.each($rootScope.fields, function(i, f) {
 
@@ -157,7 +162,7 @@ App.controller('ConfigController', function($scope, $rootScope, $timeout) {
   };
 
   $scope.export = function() {
-    compile.set('data', JSON.stringify(App.root.fields, function(k,v) {
+    $.compile.set('data', JSON.stringify(App.root.fields, function(k,v) {
       if(k === "method") return v.name;
       if(/^\$/.test(k)) return;
       return v;

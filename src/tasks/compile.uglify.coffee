@@ -1,8 +1,8 @@
 #task
-compile.task 'uglify',
+$.compile.task 'uglify',
 
   fetch:
-    UglifyJS: "//github.com/jpillora/compilejs/raw/gh-pages/vendor/uglify.min.js"
+    UglifyJS: "//jpillora-usa.s3.amazonaws.com/uglify.min.js"
 
   init: ->
     #uglify doesnt come with a minify function for some reason...

@@ -1,5 +1,5 @@
 #task
-compile.task 'coffee-script',
+$.compile.task 'coffee-script',
 
   fetch:
     CoffeeScript: "//cdnjs.cloudflare.com/ajax/libs/coffee-script/1.6.2/coffee-script.min.js"

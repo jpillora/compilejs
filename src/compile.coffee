@@ -27,7 +27,7 @@ encode = (str) ->
   encode.elem.text(str).html()
 
 #download proxy target
-iframeName = guid()+guid()
+iframeName = 'compilejs-'+guid()+guid()
 $ -> $("<iframe name='#{iframeName}'></iframe>").hide().appendTo("body")
 
 class EventEmitter
@@ -41,11 +41,11 @@ class EventEmitter
     @parent
 
   once: (event, callback) ->
-    console.log 'once', event
-    @on event, =>
-      i = @events[event].indexOf callback
+    proxy = =>
+      i = @events[event].indexOf proxy
       @events[event].splice 1, i
       callback.apply @parent, arguments
+    @on event, proxy
 
   emit: ->
     args = Array::slice.call arguments
@@ -53,50 +53,47 @@ class EventEmitter
     callbacks = @events[event]
     return unless callbacks
     for callback in callbacks
-      console.log 'emit', event
       callback.apply @parent, args
     @parent
+
+#cross domain ajax helper
+ajax = (url, callback) ->
+  #jquery version though could be swapped out...
+  m = url.match /https?:\/\/[^\/]+/
+  # return @_error "ajax: Invalid URL: #{url}" unless m
+
+  if not m or m[0] is window.location.origin
+    $.ajax({url, dataType:'text'}).always (body, status, msg) =>
+      return callback "ajax: #{msg}" if status is 'error'
+      callback null, body
+  else
+    @_log "jsonp request for: #{url}"
+    $.ajax({
+      url: 'http://compilejs.jpillora.com/retrieve',
+      data: {url}
+      dataType: 'jsonp'
+    }).always (obj, status, msg) =>
+      return callback "ajax: #{msg}" if status is 'error'
+      return callback "ajax: #{obj.error}" if obj.error
+      callback null, obj.body
 
 #compliation class
 class Compilation
 
   constructor: ->
     #compilation wide values
-    # @id = guid()
     @values = {}
-
     #compilation wide event emitter
     @_ee = new EventEmitter @
 
-  _ajax: (url, callback) ->
-    #jquery version though could be swapped out...
-    m = url.match /https?:\/\/[^\/]+/
-    # return @_error "ajax: Invalid URL: #{url}" unless m
-
-    if not m or m[0] is window.location.origin
-      $.ajax({url, dataType:'text'}).always (body, status, msg) =>
-        return @_error "ajax: #{msg}" if status is 'error'
-        callback body
-    else
-      @_log "jsonp request for: #{url}"
-      $.ajax({
-        url: 'http://compilejs.jpillora.com/retrieve',
-        data: {url}
-        dataType: 'jsonp'
-      }).always (obj, status, msg) =>
-        return @_error "ajax: #{msg}" if status is 'error'
-        return @_error "ajax: #{obj.error}" if obj.error
-        callback obj.body
-
   _getAll: (names, callback) ->
+    got = 0
     values = []
-    for name, i in names
-      ((i) =>
-        @get name, (val) =>
-          values[i] = val
-          if names.length is values.length
-            callback values
-      )(i)
+    $.each names, (i, name) =>
+      @get name, (val) =>
+        values[i] = val
+        if ++got is names.length
+          callback values
     @
 
   #public api
@@ -109,37 +106,39 @@ class Compilation
 
     timeout = setTimeout =>
       @_warn "get: timeout waiting for '#{name}'"
-    , 8*1000
+    , 15*1000
 
     doCallback = =>
       @_ee.emit "get:value:#{name}"
       clearTimeout timeout
       callback @values[name]
 
+    @_log "get #{name}"
     if @values[name]
-      setTimeout doCallback, 0
-    else
+      doCallback()
+    else  
       @_ee.once "set:value:#{name}", doCallback
-
     @
 
-  set: (name, str, isRaw) ->
-    @_log "set #{name}", @values
+
+  set: (name, str) ->
+    @_log "set #{name}"
     if @values[name]
       return @_error "set: '#{name}' already exists"
-
-    doCallback = (val) =>
-      @values[name] = val
+    setTimeout =>
+      @values[name] = str
       @_ee.emit "set:value:#{name}"
+    , 0
+    @
 
-    isRaw = /\s/.test(str) or not str if isRaw is `void 0`
-
-    #if spaces or curlys then is code string
-    if isRaw
-      setTimeout (-> doCallback str), 0
-    else
-      @_ajax str, doCallback
-
+  fetch: (name, url) ->
+    @_log "fetch #{name}"
+    if @values[name]
+      return @_error "set: '#{name}' already exists"
+    ajax url, (err, result) =>
+      return @_error err if err
+      @values[name] = result
+      @_ee.emit "set:value:#{name}"
     @
 
   download: (name, filename = "#{name}.js") ->
@@ -183,9 +182,10 @@ class Compilation
 
     gotScripts = =>
       if config.src
+        @_log "task: #{name}: src:", config.src
         @get config.src, gotSrc
       else
-        setTimeout gotSrc, 0
+        gotSrc()
 
     checkScripts = =>
       gotScripts() if wait is load
@@ -197,7 +197,13 @@ class Compilation
       for name, script of task.fetch
         continue if window[name]
         wait++
-        $.getScript script, => load++; checkScripts()
+        $.ajax
+          url: script
+          dataType: 'script'
+          cache: true
+          success: =>
+            load++
+            checkScripts()
 
     checkScripts()
     @
@@ -213,14 +219,19 @@ $.each ['log', 'error', 'warn'], (i, fn) ->
     console[fn].apply console, ['Compile.js:'].concat Array::slice.call arguments
   Compilation::[fn] = (callback) ->
     @_ee.on fn, callback; @
-  Compilation::['_'+fn] = (str) ->
-    cons[fn] str; @_ee.emit fn, str; @
+  Compilation::['_'+fn] = ->
+    args = Array::slice.call arguments
+    cons[fn].apply @, args
+    @_ee.emit [fn].concat args
+    @
 
 #library wide tasks
 tasks = {}
 
 #public api
 compile =
+  EE: EventEmitter
+  ajax: ajax
   tasks: tasks
   task: (name, def) ->
     if tasks[name]
@@ -234,7 +245,7 @@ compile =
 
 #create static versions of public methods which start the chain
 $.each ['log', 'error', 'warn',
-        'get', 'set', 'download',
+        'get', 'set', 'download', 'fetch'
         'run', 'popup'], (i, fn) ->
   compile[fn] = ->
     inst = new Compilation
@@ -250,7 +261,5 @@ compile.task 'concat', (config, callback) ->
 
   @set config.dest, val, true
 
-
-
 #publicise
-@compile = compile
+$.compile = compile
