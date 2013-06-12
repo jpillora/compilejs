@@ -26,6 +26,13 @@ encode = (str) ->
   encode.elem = encode.elem or $("<div/>")
   encode.elem.text(str).html()
 
+#ie8 polyfill
+unless Array::indexOf 
+  Array::indexOf or= (item) ->
+    for x, i in this
+      return i if x is item
+    -1
+
 #download proxy target
 iframeName = 'compilejs-'+guid()+guid()
 $ -> $("<iframe name='#{iframeName}'></iframe>").hide().appendTo("body")
@@ -154,8 +161,6 @@ class Compilation
         .append($("<textarea name='__compilejsDownload'></textarea>").text(val))
         .appendTo("body")
         .submit()
-
-      setTimeout form.remove, 1000
 
       @_log "replay download"
     @
