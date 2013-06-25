@@ -74,7 +74,6 @@ ajax = (url, callback) ->
       return callback "ajax: #{msg}" if status is 'error'
       callback null, body
   else
-    @_log "jsonp request for: #{url}"
     $.ajax({
       url: 'http://compilejs.jpillora.com/retrieve',
       data: {url}

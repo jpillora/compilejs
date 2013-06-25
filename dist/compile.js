@@ -122,7 +122,6 @@
         return callback(null, body);
       });
     } else {
-      this._log("jsonp request for: " + url);
       return $.ajax({
         url: 'http://compilejs.jpillora.com/retrieve',
         data: {
