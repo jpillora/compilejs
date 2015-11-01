@@ -387,7 +387,7 @@
     run: function(config, callback) {
       var e, error, out;
       try {
-        out = UglifyJS.minify(config.src, config.options);
+        out = UglifyJS(config.src, config.options);
       } catch (error) {
         e = error;
         callback("uglify: parse error: '" + e.message + "' on line: " + e.line + " col: " + e.col);
