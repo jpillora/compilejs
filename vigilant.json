@@ -1,3 +1,0 @@
-{
-  "coffee": "coffee -w -l -o dist/ -c src/"
-}

@@ -2,7 +2,7 @@
 (function() {
   $.compile.task('uglify', {
     fetch: {
-      UglifyJS: "//rawgit.com/jpillora/compilejs/gh-pages/vendor/uglify.min.js"
+      UglifyJS: "//jpillora-usa.s3.amazonaws.com/uglify.min.js"
     },
     init: function() {
       UglifyJS.minify = function(codes, options) {

@@ -27,7 +27,7 @@ encode = (str) ->
   encode.elem.text(str).html()
 
 #ie8 polyfill
-unless Array::indexOf 
+unless Array::indexOf
   Array::indexOf or= (item) ->
     for x, i in this
       return i if x is item
@@ -122,7 +122,7 @@ class Compilation
     @_log "get #{name}"
     if @values[name]
       doCallback()
-    else  
+    else
       @_ee.once "set:value:#{name}", doCallback
     @
 
@@ -153,14 +153,12 @@ class Compilation
       if saveAs(filename,val)
         @_log "native download"
         return
-
       form = $("<form method='post' target='#{iframeName}'></form>")
         .hide()
         .attr('action', "http://compilejs.jpillora.com/download?filename=#{encodeURIComponent(filename)}")
         .append($("<textarea name='__compilejsDownload'></textarea>").text(val))
         .appendTo("body")
         .submit()
-
       @_log "replay download"
     @
 
