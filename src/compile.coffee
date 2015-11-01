@@ -267,7 +267,7 @@ compile.task 'uglify',
     UglifyJS: "//rawgit.com/jpillora/compilejs/gh-pages/vendor/uglify.min.js"
   run: (config, callback) ->
     try
-      out = UglifyJS.minify config.src, config.options
+      out = UglifyJS config.src, config.options
     catch e
       callback "uglify: parse error: '#{e.message}' on line: #{e.line} col: #{e.col}"
       return
