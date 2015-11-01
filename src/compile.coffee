@@ -255,13 +255,24 @@ $.each ['log', 'error', 'warn',
 
 #in-built concat task
 compile.task 'concat', (config, callback) ->
-
   val = if typeof config.src is 'string'
     config.src
   else if $.isArray config.src
     config.src.join(config.sep || '\n')
-
   @set config.dest, val, true
+
+#in-built uglify task
+compile.task 'uglify',
+  fetch:
+    UglifyJS: "//rawgit.com/jpillora/compilejs/gh-pages/vendor/uglify.min.js"
+  run: (config, callback) ->
+    try
+      out = UglifyJS.minify config.src, config.options
+    catch e
+      callback "uglify: parse error: '#{e.message}' on line: #{e.line} col: #{e.col}"
+      return
+    @set config.dest, out, true
+    callback()
 
 #publicise
 $.compile = compile

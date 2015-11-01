@@ -380,6 +380,24 @@
     return this.set(config.dest, val, true);
   });
 
+  compile.task('uglify', {
+    fetch: {
+      UglifyJS: "//rawgit.com/jpillora/compilejs/gh-pages/vendor/uglify.min.js"
+    },
+    run: function(config, callback) {
+      var e, error, out;
+      try {
+        out = UglifyJS.minify(config.src, config.options);
+      } catch (error) {
+        e = error;
+        callback("uglify: parse error: '" + e.message + "' on line: " + e.line + " col: " + e.col);
+        return;
+      }
+      this.set(config.dest, out, true);
+      return callback();
+    }
+  });
+
   $.compile = compile;
 
 }).call(this);
